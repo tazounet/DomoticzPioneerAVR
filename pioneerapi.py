@@ -1,28 +1,35 @@
 #!/usr/bin/env python
 
 INPUT_MODES= {
-    '25' : 'BD',
+    '00' : 'PHONO',
+    '01' : 'CD',
+    '02' : 'TUNER',
+    '03' : 'CD-R/TAPE',
     '04' : 'DVD',
     '05' : 'TV/SAT',
-    '15' : 'DVR/BDR',
+    '06' : 'SAT/CBL',
     '10' : 'VIDEO 1',
+    '12' : 'MULTI CH IN',
     '14' : 'VIDEO 2',
+    '15' : 'DVR/BDR',
+    '17' : 'iPod/USB',
+    '18' : 'XM RADIO',
     '19' : 'HDMI 1',
     '20' : 'HDMI 2',
     '21' : 'HDMI 3',
     '22' : 'HDMI 4',
     '23' : 'HDMI 5',
     '24' : 'HDMI 6',
+    '25' : 'BD',
     '26' : 'H.M.G.',
-    '17' : 'iPod/USB',
-    '01' : 'CD',
-    '03' : 'CD-R/TAPE',
-    '02' : 'TUNER',
-    '00' : 'PHONO',
-    '12' : 'MULTI CH IN',
-    '33' : 'ADAPTER PORT',
     '27' : 'SIRIUS',
-    '31' : 'HDMI (cyclic)'
+    '31' : 'HDMI (cyclic)',
+    '33' : 'ADAPTER PORT',
+    '38' : 'INTERNET RADIO',
+    '40' : 'SiriusXM',
+    '41' : 'PANDORA',
+    '44' : 'MEDIA SERVER',
+    '45' : 'FAVORITES'
 }
 
 LISTENING_MODES = {
