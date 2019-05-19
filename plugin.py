@@ -125,7 +125,10 @@ class BasePlugin:
             else: #PWR1
                 self.power_on = False
         elif loaction == 'VOL': #VOLUME
-            self.volume_level = str(round((int(str(lodetail))*100)/185))
+            if self.mute == 'On': # In mute, discard volume processing
+                Domoticz.Debug('VOL command discarded in mute')
+            else:
+                self.volume_level = str(round((int(str(lodetail))*100)/185))
         elif loaction == 'MUT': #MUTE
             if lodetail == '0': #MUT0
                 self.mute = 'On'
