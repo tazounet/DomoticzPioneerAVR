@@ -32,6 +32,7 @@ class BasePlugin:
 
     power_on = False
     volume_level = None
+    volume_target = None
     mute = None
     input_rgb_name = None
     input_mode = "0"
@@ -183,8 +184,13 @@ class BasePlugin:
             if (action == "On"):
                 self.PioneerConn.Send(Message='MF\r', Delay=0)
             elif (action == "Set"):
-                self.volume_level = str(round((int(Level)*185)/100)).rjust(3,'0')
-                self.PioneerConn.Send(Message=self.volume_level+'VL\r', Delay=0)
+                self.volume_target = str(round((int(Level)*185)/100)).rjust(3,'0')
+                if int(self.volume_level) > int(self.volume_target):
+                      for x in range(int(self.volume_level), int(self.volume_target), -1):
+                             self.PioneerConn.Send(Message='VD\r', Delay=0)
+                else:
+                      for x in range(int(self.volume_level), int(self.volume_target), 1):
+                             self.PioneerConn.Send(Message='VU\r', Delay=0)
             elif (action == "Off"):
                 self.PioneerConn.Send(Message='MO\r', Delay=0)
             Domoticz.Debug('Level:'+str(Level))
