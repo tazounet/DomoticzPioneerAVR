@@ -19,6 +19,7 @@ class BasePlugin:
 
     nextConnect = 3
     oustandingPings = 0
+    VOLUMESTEP = 2
 
     UNITS = {
         'power': 1,
@@ -32,7 +33,6 @@ class BasePlugin:
 
     power_on = False
     volume_level = None
-    volume_target = None
     mute = None
     input_rgb_name = None
     input_mode = "0"
@@ -184,13 +184,18 @@ class BasePlugin:
             if (action == "On"):
                 self.PioneerConn.Send(Message='MF\r', Delay=0)
             elif (action == "Set"):
-                self.volume_target = str(round((int(Level)*185)/100)).rjust(3,'0')
-                if int(self.volume_level) > int(self.volume_target):
-                      for x in range(int(self.volume_level), int(self.volume_target), -1):
-                             self.PioneerConn.Send(Message='VD\r', Delay=0)
-                else:
-                      for x in range(int(self.volume_level), int(self.volume_target), 1):
-                             self.PioneerConn.Send(Message='VU\r', Delay=0)
+                level = int(str(Level))
+                delta = level - int(self.volume_level)
+                Domoticz.Debug("delta: "+str(delta))
+                for i in range(0, abs(delta), self.VOLUMESTEP):
+                    if delta < 0:
+                        self.volume_level = str(int(self.volume_level)-self.VOLUMESTEP)
+                        self.PioneerConn.Send(Message='VD\r', Delay=0)
+                        Domoticz.Debug("VD")
+                    elif delta > 0:
+                        self.volume_level = str(int(self.volume_level)+self.VOLUMESTEP)
+                        self.PioneerConn.Send(Message='VU\r', Delay=0)
+                        Domoticz.Debug("VU")
             elif (action == "Off"):
                 self.PioneerConn.Send(Message='MO\r', Delay=0)
             Domoticz.Debug('Level:'+str(Level))
