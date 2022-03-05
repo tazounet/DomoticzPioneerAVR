@@ -39,10 +39,8 @@ class BasePlugin:
     listening_mode = None
     playing_mode = None
     display_text = None
-    InputIdx = ("01","02","04","05","06","17","19","25","38","44","45","48","49","56")
 
     def __init__(self):
-        #self.var = 123
         return
 
     def onStart(self):
@@ -52,10 +50,10 @@ class BasePlugin:
             Domoticz.Debugging(1)
 
         InputSelections = 'Off'
-        for a in self.InputIdx:
+        for a in pioneerapi.INPUT_MODES.keys():
             InputSelections = InputSelections+'|'+pioneerapi.INPUT_MODES[a]
         Domoticz.Debug('LIST:'+InputSelections)
-            
+
         SourceOptions = {'LevelActions': '|'*InputSelections.count('|'),
                               'LevelNames': InputSelections,
                               'LevelOffHidden': 'false',
@@ -97,7 +95,7 @@ class BasePlugin:
             self.PioneerConn.Send(api.qry_VolumeStatus, Delay=3)
             self.PioneerConn.Send(api.qry_ListeningModeStatus, Delay=4)
             wait=5
-            for key in self.InputIdx:
+            for key in pioneerapi.INPUT_MODES.keys():
                 wait += 1
                 self.PioneerConn.Send("?RGB"+str(key)+"\r", Delay=wait)
         else:
@@ -141,17 +139,16 @@ class BasePlugin:
             if self.input_rgb_name != None:
                 Domoticz.Debug('RGB:'+self.input_rgb_name)
                 InputSelections = 'Off'
-                for a in self.InputIdx:
+                for a in pioneerapi.INPUT_MODES.keys():
                     InputSelections = InputSelections+'|'+pioneerapi.INPUT_MODES[a]
                 Domoticz.Debug('LIST:'+InputSelections)
-
                 SourceOptions = {'LevelActions': '|'*InputSelections.count('|'),
                                 'LevelNames': InputSelections,
                                 'LevelOffHidden': 'false',
                                 'SelectorStyle': '1'}
                 Devices[self.UNITS['input']].Update(nValue = 0, sValue = "Off", Options = SourceOptions)
 
-        elif shaction == 'FN': #INPUT            
+        elif shaction == 'FN': #INPUT
             self.input_mode = self.selector_find(str(shdetail), 0)
             Domoticz.Debug('FN:'+str(self.input_mode))
         elif shaction == 'SR': #LISTENING MODE
@@ -202,12 +199,9 @@ class BasePlugin:
         elif Unit == self.UNITS['input']:
             if (action == "Set"):
                 if Level != "0":
-                    self.input_mode = self.selector_find(Level,1)
-                    self.PioneerConn.Send(Message=self.input_mode+'FN\r', Delay=0)
-                else:
-                    self.power_on = False
-                    self.PioneerConn.Send(Message=api.cmd_PowerOff, Delay=0)
-
+                    self.input_mode = Level
+                    new_mode = self.selector_find(Level,1)
+                    self.PioneerConn.Send(Message=new_mode+'FN\r', Delay=0)
 
     def onNotification(self, Name, Subject, Text, Status, Priority, Sound, ImageFile):
         Domoticz.Log("Notification: " + Name + "," + Subject + "," + Text + "," + Status + "," + str(Priority) + "," + Sound + "," + ImageFile)
@@ -253,12 +247,12 @@ class BasePlugin:
         return
 
     def selector_find(self, query, ctype):
-            if ctype == 0:
-                sel = (self.InputIdx.index(str(query))+1)*10 #Off olduğu için +1 var
-                Domoticz.Debug('INDEX:'+str(sel))
-            else:
-                sel = self.InputIdx[int((query/10)-1)] #Off olduğu için -1 var
-            return sel
+        if ctype == 0:
+            sel = (list(pioneerapi.INPUT_MODES.keys()).index(str(query))+1)*10 # +1 for Off
+            Domoticz.Debug('INDEX:'+str(sel))
+        else:
+            sel = list(pioneerapi.INPUT_MODES.keys())[int((query/10)-1)] # -1 for Off
+        return sel
 
 global _plugin
 _plugin = BasePlugin()
@@ -298,7 +292,7 @@ def onHeartbeat():
 # Generic helper functions
 
 def UpdateDevice(Unit, nValue, sValue, TimedOut):
-    # Make sure that the Domoticz device still exists (they can be deleted) before updating it 
+    # Make sure that the Domoticz device still exists (they can be deleted) before updating it
     if (Unit in Devices):
         if (Devices[Unit].nValue != nValue) or (Devices[Unit].sValue != sValue) or (Devices[Unit].TimedOut != TimedOut):
             Devices[Unit].Update(nValue=nValue, sValue=str(sValue), TimedOut=TimedOut)
